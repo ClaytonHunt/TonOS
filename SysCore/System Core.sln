@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kernel", "Kernel\Kernel.vcxproj", "{0F165E73-4E9B-4DD2-8AAA-162D21D764A1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kernel", "Kernel\Kernel.vcxproj", "{1127FDC6-EBC7-4888-A5B4-DC12222D280A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lib", "Lib\Lib.vcxproj", "{C744D359-444D-4778-81A3-7C8346A39D96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +11,14 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0F165E73-4E9B-4DD2-8AAA-162D21D764A1}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0F165E73-4E9B-4DD2-8AAA-162D21D764A1}.Debug|Win32.Build.0 = Debug|Win32
-		{0F165E73-4E9B-4DD2-8AAA-162D21D764A1}.Release|Win32.ActiveCfg = Release|Win32
-		{0F165E73-4E9B-4DD2-8AAA-162D21D764A1}.Release|Win32.Build.0 = Release|Win32
+		{1127FDC6-EBC7-4888-A5B4-DC12222D280A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1127FDC6-EBC7-4888-A5B4-DC12222D280A}.Debug|Win32.Build.0 = Debug|Win32
+		{1127FDC6-EBC7-4888-A5B4-DC12222D280A}.Release|Win32.ActiveCfg = Release|Win32
+		{1127FDC6-EBC7-4888-A5B4-DC12222D280A}.Release|Win32.Build.0 = Release|Win32
+		{C744D359-444D-4778-81A3-7C8346A39D96}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C744D359-444D-4778-81A3-7C8346A39D96}.Debug|Win32.Build.0 = Debug|Win32
+		{C744D359-444D-4778-81A3-7C8346A39D96}.Release|Win32.ActiveCfg = Release|Win32
+		{C744D359-444D-4778-81A3-7C8346A39D96}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
