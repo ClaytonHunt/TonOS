@@ -23,6 +23,8 @@ jmp	main						; go to start
 %include "stdio.inc"			; basic i/o routines
 %include "Gdt.inc"				; Gdt routines
 %include "A20.inc"				; A20 enabling
+%include "fat12.inc"			; FAT12 driver. Kinda :)
+%include "common.inc"
 
 ;*******************************************************
 ;	Data Section
