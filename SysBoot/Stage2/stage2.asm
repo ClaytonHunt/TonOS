@@ -119,6 +119,8 @@ EnterStage3:
 
 bits 32
 
+BadKernel db "*** FATAL: Invalid or corrupt kernel image. Halting system.", 0
+
 Stage3:
 
 	;---------------------------;
@@ -130,6 +132,8 @@ Stage3:
 	mov		ss, ax
 	mov		es, ax
 	mov		esp, 90000h						; stack begins from 90000h
+	
+	call ClrScr32
 	
 	;---------------------------;
 	;	Copy Kernel to 1MB		;
@@ -147,17 +151,117 @@ CopyKernel:
 	mov		ecx, eax						; bytes or nibbles to copy
 	rep		movsd							; copy kernel to its protected mode address
 	
+TestKernel:
+	mov		ebx, [KERNEL_PMODE_BASE+60]
+	add		ebx, KERNEL_PMODE_BASE			; ebx now points to file signature (PE00)
+	mov		esi, ebx
+	mov		edi, KernelSignature
+	cmpsw
+	je		EXECUTE
+	mov		ebx, BadKernel
+	call	Puts32
+	cli
+	hlt
+	
+KernelSignature	db "PE"
+
+EXECUTE:
+	
 	;---------------------------;
 	;	Execute Kernel			;
 	;---------------------------;
 	
-	jmp		CODE_DESC:KERNEL_PMODE_BASE 	; jump to our kernel!
+	; parse the programs header info structures to get its entry points
 	
-	; Note: This assumes Kernel's entry point is at 1MB
-
-	;---------------------------------------;
-	;   Stop execution						;
-	;---------------------------------------;
-
+	add		ebx, 24
+	mov		eax, [ebx]						; _IMAGE_FILE_HEADER is 20 bytes + size of sig (4 bytes)
+	add		ebx, 20-4						; address of entry points
+	mov		ebp, dword [ebx]				; get entry point offset in code section
+	add		ebx, 12							; image base is offset 8 bytes from entry point
+	mov		eax, dword [ebx]				; add image base
+	add		ebp, eax
+	cli
+	
+	call ebp								; Execute Kernel
+	
 	cli
 	hlt
+	
+;-- header information format for PE files -------------------
+
+;typedef struct _IMAGE_DOS_HEADER {  // DOS .EXE header
+;    USHORT e_magic;         // Magic number (Should be MZ
+;    USHORT e_cblp;          // Bytes on last page of file
+;    USHORT e_cp;            // Pages in file
+;    USHORT e_crlc;          // Relocations
+;    USHORT e_cparhdr;       // Size of header in paragraphs
+;    USHORT e_minalloc;      // Minimum extra paragraphs needed
+;    USHORT e_maxalloc;      // Maximum extra paragraphs needed
+;    USHORT e_ss;            // Initial (relative) SS value
+;    USHORT e_sp;            // Initial SP value
+;    USHORT e_csum;          // Checksum
+;    USHORT e_ip;            // Initial IP value
+;    USHORT e_cs;            // Initial (relative) CS value
+;    USHORT e_lfarlc;        // File address of relocation table
+;    USHORT e_ovno;          // Overlay number
+;    USHORT e_res[4];        // Reserved words
+;    USHORT e_oemid;         // OEM identifier (for e_oeminfo)
+;    USHORT e_oeminfo;       // OEM information; e_oemid specific
+;    USHORT e_res2[10];      // Reserved words
+;    LONG   e_lfanew;        // File address of new exe header
+;  } IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
+
+;<<------ Real mode stub program -------->>
+
+;<<------ Here is the file signiture, such as PE00 for NT --->>
+
+;typedef struct _IMAGE_FILE_HEADER {
+;    USHORT  Machine;
+;    USHORT  NumberOfSections;
+;    ULONG   TimeDateStamp;
+;    ULONG   PointerToSymbolTable;
+;    ULONG   NumberOfSymbols;
+;    USHORT  SizeOfOptionalHeader;
+;    USHORT  Characteristics;
+;} IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
+
+;struct _IMAGE_OPTIONAL_HEADER {
+;    //
+;    // Standard fields.
+;    //
+;    USHORT  Magic;
+;    UCHAR   MajorLinkerVersion;
+;    UCHAR   MinorLinkerVersion;
+;    ULONG   SizeOfCode;
+;    ULONG   SizeOfInitializedData;
+;    ULONG   SizeOfUninitializedData;
+;    ULONG   AddressOfEntryPoint;			<< IMPORTANT!
+;    ULONG   BaseOfCode;
+;    ULONG   BaseOfData;
+;    //
+;    // NT additional fields.
+;    //
+;    ULONG   ImageBase;
+;    ULONG   SectionAlignment;
+;    ULONG   FileAlignment;
+;    USHORT  MajorOperatingSystemVersion;
+;    USHORT  MinorOperatingSystemVersion;
+;    USHORT  MajorImageVersion;
+;    USHORT  MinorImageVersion;
+;    USHORT  MajorSubsystemVersion;
+;    USHORT  MinorSubsystemVersion;
+;    ULONG   Reserved1;
+;    ULONG   SizeOfImage;
+;    ULONG   SizeOfHeaders;
+;    ULONG   CheckSum;
+;    USHORT  Subsystem;
+;    USHORT  DllCharacteristics;
+;    ULONG   SizeOfStackReserve;
+;    ULONG   SizeOfStackCommit;
+;    ULONG   SizeOfHeapReserve;
+;    ULONG   SizeOfHeapCommit;
+;    ULONG   LoaderFlags;
+;    ULONG   NumberOfRvaAndSizes;
+;    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+;} IMAGE_OPTIONAL_HEADER, *PIMAGE_OPTIONAL_HEADER;
+
