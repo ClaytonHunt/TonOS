@@ -1,0 +1,1 @@
+nasm -f bin Boot3.asm -o stage1.bin
