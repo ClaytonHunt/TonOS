@@ -25,17 +25,17 @@
 bits	16
 
 Puts16:
-		pusha				; save registers
+		pusha					; save registers
 .Loop1:
-		lodsb				; load next byte from string from SI to AL
-		or	al, al			; Does AL=0?
-		jz	Puts16Done		; Yep, null terminator found-bail out
-		mov	ah, 0eh			; Nope-Print the character
-		int	10h			; invoke BIOS
-		jmp	.Loop1			; Repeat until null terminator found
+		lodsb					; load next byte from string from SI to AL
+		or	al, al				; Does AL=0?
+		jz	Puts16Done			; Yep, null terminator found-bail out
+		mov	ah, 0eh				; Nope-Print the character
+		int	10h					; invoke BIOS
+		jmp	.Loop1				; Repeat until null terminator found
 Puts16Done:
-		popa				; restore registers
-		ret				; we are done, so return
+		popa					; restore registers
+		ret						; we are done, so return
 
 
 ;==========================================================
@@ -50,7 +50,7 @@ bits 32
 %define		LINES	25
 %define		CHAR_ATTRIB 0x1F	; character attribute (White text on light blue background)
 
-_CurX db 0					; current x/y location
+_CurX db 0						; current x/y location
 _CurY db 0
 
 ;**************************************************;
@@ -61,14 +61,14 @@ _CurY db 0
 
 Putch32:
 
-	pusha				; save registers
-	mov	edi, VIDMEM		; get pointer to video memory
+	pusha						; save registers
+	mov	edi, VIDMEM				; get pointer to video memory
 
 	;-------------------------------;
-	;   Get current position	;
+	;   Get current position		;
 	;-------------------------------;
 
-	xor	eax, eax		; clear eax
+	xor	eax, eax				; clear eax
 
 		;--------------------------------
 		; Remember: currentPos = x + y * COLS! x and y are in _CurX and _CurY.
@@ -77,10 +77,10 @@ Putch32:
 		; so multiply screen with * _CurY to get current line
 		;--------------------------------
 
-		mov	ecx, COLS*2		; Mode 7 has 2 bytes per char, so its COLS*2 bytes per line
+		mov	ecx, COLS*2			; Mode 7 has 2 bytes per char, so its COLS*2 bytes per line
 		mov	al, byte [_CurY]	; get y pos
-		mul	ecx			; multiply y*COLS
-		push	eax			; save eax--the multiplication
+		mul	ecx					; multiply y*COLS
+		push	eax				; save eax--the multiplication
 
 		;--------------------------------
 		; Now y * screen width is in eax. Now, just add _CurX. But, again remember that _CurX is relative
@@ -91,7 +91,7 @@ Putch32:
 		mov	al, byte [_CurX]	; multiply _CurX by 2 because it is 2 bytes per char
 		mov	cl, 2
 		mul	cl
-		pop	ecx			; pop y*COLS result
+		pop	ecx					; pop y*COLS result
 		add	eax, ecx
 
 		;-------------------------------
@@ -100,46 +100,46 @@ Putch32:
 		;-------------------------------
 
 		xor	ecx, ecx
-		add	edi, eax		; add it to the base address
+		add	edi, eax			; add it to the base address
 
 	;-------------------------------;
 	;   Watch for new line          ;
 	;-------------------------------;
 
-	cmp	bl, 0x0A		; is it a newline character?
-	je	.Row			; yep--go to next row
+	cmp	bl, 0x0A				; is it a newline character?
+	je	.Row					; yep--go to next row
 
 	;-------------------------------;
 	;   Print a character           ;
 	;-------------------------------;
 
-	mov	dl, bl			; Get character
-	mov	dh, CHAR_ATTRIB		; the character attribute
-	mov	word [edi], dx		; write to video display
+	mov	dl, bl					; Get character
+	mov	dh, CHAR_ATTRIB			; the character attribute
+	mov	word [edi], dx			; write to video display
 
 	;-------------------------------;
 	;   Update next position        ;
 	;-------------------------------;
 
-	inc	byte [_CurX]		; go to next character
+	inc	byte [_CurX]			; go to next character
 ;	cmp	byte [_CurX], COLS		; are we at the end of the line?
-;	je	.Row			; yep-go to next row
-	jmp	.done			; nope, bail out
+;	je	.Row					; yep-go to next row
+	jmp	.done					; nope, bail out
 
 	;-------------------------------;
 	;   Go to next row              ;
 	;-------------------------------;
 
 .Row:
-	mov	byte [_CurX], 0		; go back to col 0
-	inc	byte [_CurY]		; go to next row
+	mov	byte [_CurX], 0			; go back to col 0
+	inc	byte [_CurY]			; go to next row
 
 	;-------------------------------;
 	;   Restore registers & return  ;
 	;-------------------------------;
 
 .done:
-	popa				; restore registers and return
+	popa						; restore registers and return
 	ret
 
 ;**************************************************;
@@ -154,8 +154,8 @@ Puts32:
 	;   Store registers             ;
 	;-------------------------------;
 
-	pusha				; save registers
-	push	ebx			; copy the string address
+	pusha						; save registers
+	push	ebx					; copy the string address
 	pop	edi
 
 .loop:
@@ -164,21 +164,21 @@ Puts32:
 	;   Get character               ;
 	;-------------------------------;
 
-	mov	bl, byte [edi]		; get next character
-	cmp	bl, 0			; is it 0 (Null terminator)?
-	je	.done			; yep-bail out
+	mov	bl, byte [edi]			; get next character
+	cmp	bl, 0					; is it 0 (Null terminator)?
+	je	.done					; yep-bail out
 
 	;-------------------------------;
 	;   Print the character         ;
 	;-------------------------------;
 
-	call	Putch32			; Nope-print it out
+	call	Putch32				; Nope-print it out
 
 	;-------------------------------;
 	;   Go to next character        ;
 	;-------------------------------;
 
-	inc	edi			; go to next character
+	inc	edi						; go to next character
 	jmp	.loop
 
 .done:
@@ -190,11 +190,11 @@ Puts32:
 	; Its more efficiant to update the cursor after displaying
 	; the complete string because direct VGA is slow
 
-	mov	bh, byte [_CurY]	; get current position
+	mov	bh, byte [_CurY]		; get current position
 	mov	bl, byte [_CurX]
-	call	MovCur			; update cursor
+	call	MovCur				; update cursor
 
-	popa				; restore registers, and return
+	popa						; restore registers, and return
 	ret
 
 ;**************************************************;
@@ -208,7 +208,7 @@ bits 32
 
 MovCur:
 
-	pusha				; save registers (aren't you getting tired of this comment?)
+	pusha						; save registers (aren't you getting tired of this comment?)
 
 	;-------------------------------;
 	;   Get current position        ;
@@ -220,9 +220,9 @@ MovCur:
 
 	xor	eax, eax
 	mov	ecx, COLS
-	mov	al, bh			; get y pos
-	mul	ecx			; multiply y*COLS
-	add	al, bl			; Now add x
+	mov	al, bh					; get y pos
+	mul	ecx						; multiply y*COLS
+	add	al, bl					; Now add x
 	mov	ebx, eax
 
 	;--------------------------------------;
@@ -235,7 +235,7 @@ MovCur:
 
 	mov	al, bl
 	mov	dx, 0x03D5
-	out	dx, al			; low byte
+	out	dx, al					; low byte
 
 	;---------------------------------------;
 	;   Set high byte index to VGA register ;
@@ -249,7 +249,7 @@ MovCur:
 
 	mov	al, bh
 	mov	dx, 0x03D5
-	out	dx, al			; high byte
+	out	dx, al					; high byte
 
 	popa
 	ret
@@ -287,7 +287,7 @@ bits 32
 
 GotoXY:
 	pusha
-	mov	[_CurX], al		; just set the current position
+	mov	[_CurX], al				; just set the current position
 	mov	[_CurY], ah
 	popa
 	ret

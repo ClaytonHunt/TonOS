@@ -7,7 +7,8 @@ jmp Stage3								; jump to stage 3
 
 %include "stdio.inc"					; Our stdio.inc file we developed from the previous tutorials
 
-msg db 0x0A, 0x0A, "Welcome to Kernel Land!!", 0x0A, 0x0A
+msg db  0x0A, 0x0A, "                       - OS Development Series -"
+    db  0x0A, 0x0A, "                     MOS 32 Bit Kernel Executing", 0x0A, 0
 
 Stage3:
 	
